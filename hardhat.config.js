@@ -6,7 +6,6 @@ require('@nomiclabs/hardhat-ethers')
 const {API_KEY, PRIVATE_KEY, ETHERSCAN_API_KEY} = process.env;
 
 
-
 module.exports = {
   networks: {
     hardhat: {
