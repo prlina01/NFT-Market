@@ -18,7 +18,7 @@ contract NFTMarket is ReentrancyGuard {
     }
 
     struct MarketItem {
-        uint ItemId;
+        uint itemId;
         address nftContract;
         uint tokenId;
         address payable seller;
@@ -63,7 +63,7 @@ contract NFTMarket is ReentrancyGuard {
 
         IERC721(nftContract).transferFrom(msg.sender, address(this), tokenId);
 
-        emit MarketItemCreated(itemId, nftContract, tokenId, msg.sender, address(0), price, false);
+        emit MarketItemCreated(itemId, nftContract, tokenId, payable(msg.sender), payable(address(0)), price, false);
 
     }
 
@@ -72,7 +72,7 @@ contract NFTMarket is ReentrancyGuard {
         uint tokenId = idToMarketItem[itemId].tokenId;
         require(msg.value == price, "Please submit the asking price to complete the purchase!");
 
-        address seller = idToMarketItem[itemId].seller;
+        address payable seller = idToMarketItem[itemId].seller;
         seller.transfer(msg.value);
         IERC721(nftContract).transferFrom(address(this), msg.sender, tokenId);
         idToMarketItem[itemId].owner = payable(msg.sender);

@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "debug": "npx hardhat test"
   },
   "dependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.5",
