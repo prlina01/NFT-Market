@@ -1,5 +1,7 @@
-const { ethers } = require("hardhat")
-export async function main() {
+import { ethers } from "hardhat";
+
+
+async function main() {
     const NFTMarket = await ethers.getContractFactory('NFTMarket')
     const nftMarket = await NFTMarket.deploy()
 
