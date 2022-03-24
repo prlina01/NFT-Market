@@ -1,11 +1,17 @@
 import '../styles/globals.css'
 import type { AppProps } from 'next/app'
 import Link from 'next/link'
+import {ExternalProvider, JsonRpcFetchFunc, Web3Provider} from "@ethersproject/providers";
+import {Web3ReactProvider} from "@web3-react/core";
+
+// const getLibrary = (provider: ExternalProvider | JsonRpcFetchFunc) => {
+//     return new Web3Provider(provider)
+// }
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
-      <div>
-        <nav className="border-b p-6">
+    <>
+    <nav className="border-b p-6">
             <p className="text-4xl font-bold">Future Marketplace</p>
             <div className="flex mt-4">
                 <Link href="/">
@@ -29,9 +35,9 @@ function MyApp({ Component, pageProps }: AppProps) {
                     </a>
                 </Link>
             </div>
-        </nav>
-        <Component {...pageProps} />
-      </div>
+    </nav>
+      <Component {...pageProps} />
+    </>
       )
 }
 

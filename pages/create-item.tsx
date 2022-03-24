@@ -8,6 +8,7 @@ import NFT from '../artifacts/contracts/NFT.sol/NFT.json'
 import Market from '../artifacts/contracts/NFTMarket.sol/NFTMarket.json'
 import { InjectedConnector } from "@web3-react/injected-connector";
 import {useForm} from "react-hook-form";
+import Web3Modal from 'web3modal'
 
 
 // @ts-ignore
@@ -47,59 +48,61 @@ export default function CreateItem() {
         try {
             const added = await client.add(file)
             const url = `https://ipfs.infura.io/ipfs/${added.path}`
-            console.log(url)
             setFileUrl(url)
         } catch (e) {
             console.log(e)
         }
     }
 
-    useEffect(() => {
-
-        if (active && nftPrice) void createSale()
-    }, [active])
+    // useEffect(() => {
+    //
+    //     if (active && nftPrice) void createSale()
+    // }, [active])
 
     async function createItem(item: any) {
-        if(!active) await connect()
-        const {name, description, price} = item
+        // if(!active) await connect()
+        console.log('item', item)
+        // const {name, description, price} = item
+        const name = item.name
+        const description = item.description
+        const price = item.price
+        console.log('price1', price)
         setNftPrice(price)
+
         // const {name, description, price} = formInput
 
 
-
-        console.log(name, description, price, fileUrl)
+        // console.log(name, description, price, fileUrl)
+        console.log('price2:', nftPrice)
         // if(!name || !description || !price || !fileUrl) return
         const data = JSON.stringify({name, description, image: fileUrl})
         try {
             const added = await client.add(data)
             const url = `https://ipfs.infura.io/ipfs/${added.path}`
-            setFileUrl(url)
-            await createSale()
+            await createSale(url)
         } catch (e) {
             console.log(e)
         }
 
     }
 
-    async function createSale() {
-        // const web3Modal = new Web3Modal()
-        // const connection = await web3Modal.connect()
-        // const provider = new ethers.providers.Web3Provider(connection)
+    async function createSale(url: string) {
+        const web3Modal = new Web3Modal()
+        const connection = await web3Modal.connect()
+        const provider = new ethers.providers.Web3Provider(connection)
         const signer = provider.getSigner()
-        console.log(signer)
+        console.log('price3:', nftPrice)
 
         let contract = new ethers.Contract(nftaddress, NFT.abi, signer)
-        let transaction = await contract.createToken(fileUrl)
+        let transaction = await contract.createToken(url)
         let tx = await transaction.wait()
 
         let event = tx.events[0]
         let value = event.args[2]
-        console.log('event', event)
-        console.log('value', value)
         let tokenId = value.toNumber()
-        console.log('tokenId', value)
 
         const price = ethers.utils.parseUnits(nftPrice.toString(), 'ether')
+        console.log('price4', price)
         contract = new ethers.Contract(nftmarketaddress, Market.abi, signer)
 
         let listingPrice = await contract.getListingPrice()
