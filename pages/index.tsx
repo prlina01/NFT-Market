@@ -1,14 +1,13 @@
 import {ethers} from 'ethers'
 import {useEffect, useState} from 'react'
 import axios from 'axios'
-import {useWeb3React} from "@web3-react/core";
-import {InjectedConnector} from '@web3-react/injected-connector'
 
 import {nftaddress, nftmarketaddress} from '../.config'
 
 import NFT from '../artifacts/contracts/NFT.sol/NFT.json'
 import Market from '../artifacts/contracts/NFTMarket.sol/NFTMarket.json'
 import Web3Modal from "web3modal";
+
 
 interface IMarketItem {
     itemId: number;
@@ -20,15 +19,11 @@ interface IMarketItem {
     sold: boolean;
 }
 
-// @ts-ignore
-// const injected = new InjectedConnector()
 
 
 export default function Home() {
     const [nfts, setNfts] = useState<any[]>([])
     const [loadingState, setLoadingState] = useState<string>('not-loaded')
-    const {account, deactivate, activate, active, library: provider} = useWeb3React()
-
 
     useEffect(() => {
         void loadNFTs()
@@ -38,12 +33,10 @@ export default function Home() {
         const provider = new ethers.providers.AlchemyProvider('rinkeby')
         const tokenContract = new ethers.Contract(nftaddress, NFT.abi, provider)
         const marketContract = new ethers.Contract(nftmarketaddress, Market.abi, provider)
-        console.log('provider, tokencontract, marketcontract', provider, tokenContract, marketContract)
         const data = await marketContract.fetchMarketItems()
         const items = await Promise.all(data.map(async (i: IMarketItem) => {
             const tokenUri = await tokenContract.tokenURI(i.tokenId)
             const meta = await axios.get(tokenUri) //https://ipfs...
-            console.log(meta.data.description)
             let price = ethers.utils.formatUnits(i.price.toString(), 'ether')
             let item = {
                 price,
@@ -68,13 +61,16 @@ export default function Home() {
 
         const provider = new ethers.providers.Web3Provider(connection)
 
-        // await connect()
 
         const signer = provider.getSigner()
         const contract = new ethers.Contract(nftmarketaddress, Market.abi, signer)
-
+        let currentBalance = await signer.getBalance()
+        // currentBalance = ethers.utils.parseUnits(currentBalance.toString(), 'ether')
         const price = ethers.utils.parseUnits(nft.price.toString(), 'ether')
-
+        // console.log(currentBalance.toString(), price.toString())
+        if(currentBalance.lt(price)) {
+            return
+        }
         const transaction = await contract.createMarketSale(nftaddress, nft.tokenId,
             {value: price})
         await transaction.wait()
@@ -82,19 +78,13 @@ export default function Home() {
         await loadNFTs()
     }
 
-    // async function connect() {
-    //     try {
-    //         await activate(injected)
-    //         localStorage.setItem('isWalletConnected', 'true')
-    //     } catch(e) {
-    //         console.log(e)
-    //     }
-    // }
+
     if (loadingState === 'loaded' && !nfts.length) return (
         <h1 className="px-20 py-10 text-3xl">
             No items in the marketplace
         </h1>
     )
+
 
     return(
       <div className="flex justify-center">
@@ -117,8 +107,7 @@ export default function Home() {
                                       {nft.price} Matic
                                   </p>
                                   <button className="w-full bg-pink-500 text-white font-bold py-2 px-12
-                                  rounded" onClick={() => buyNFTs(nft)}>
-                                      Buy NFT!
+                                  rounded" onClick={() => buyNFTs(nft)}>Buy NFT!
                                   </button>
                               </div>
                           </div>
