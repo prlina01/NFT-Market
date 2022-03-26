@@ -7,6 +7,7 @@ import {nftaddress, nftmarketaddress} from '../.config'
 import NFT from '../artifacts/contracts/NFT.sol/NFT.json'
 import Market from '../artifacts/contracts/NFTMarket.sol/NFTMarket.json'
 import Web3Modal from "web3modal";
+import { Modal, useModal, Button, Text, Grid, Card, Col, Row } from "@nextui-org/react";
 
 
 interface IMarketItem {
@@ -24,6 +25,7 @@ interface IMarketItem {
 export default function Home() {
     const [nfts, setNfts] = useState<any[]>([])
     const [loadingState, setLoadingState] = useState<string>('not-loaded')
+    const { setVisible, bindings } = useModal();
 
     useEffect(() => {
         void loadNFTs()
@@ -69,6 +71,7 @@ export default function Home() {
         const price = ethers.utils.parseUnits(nft.price.toString(), 'ether')
         // console.log(currentBalance.toString(), price.toString())
         if(currentBalance.lt(price)) {
+            setVisible(true)
             return
         }
         const transaction = await contract.createMarketSale(nftaddress, nft.tokenId,
@@ -87,34 +90,98 @@ export default function Home() {
 
 
     return(
-      <div className="flex justify-center">
-          <div className="px-4" style={{maxWidth: '1600px'}}>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
+      <Grid.Container gap={2} justify="center">
                   {
                       nfts.map((nft, i) => (
-                          <div key={i} className="border shadow rounded-xl overflow-hidden">
-                              <img src={nft.image}  alt="alt"/>
-                              <div className="p-4">
-                                  <p style={{height: '64px'}} className="text-2xl font-semibold">
-                                      {nft.name}
-                                  </p>
-                                  <div style={{height: '70px', overflow: 'hidden'}}>
-                                      <p className="text-gray-400">{nft.description}</p>
-                                  </div>
-                              </div>
-                              <div className="p-4 bg-black">
-                                  <p className="text-2xl mb-4 font-bold text-white">
-                                      {nft.price} Matic
-                                  </p>
-                                  <button className="w-full bg-pink-500 text-white font-bold py-2 px-12
-                                  rounded" onClick={() => buyNFTs(nft)}>Buy NFT!
-                                  </button>
-                              </div>
-                          </div>
+                            <Grid xs={12} sm={4} lg={3} key={i} >
+                                <Card cover>
+                                    <Card.Header css={{ position: "absolute", zIndex: 1, top: 5 }}>
+                                        <Col>
+                                            <Text
+                                              size={12}
+                                              weight="bold"
+                                              transform="uppercase"
+                                              color="#ffffffAA"
+                                            >
+                                                {nft.name}
+                                            </Text>
+                                            <Text h4 color="white">
+                                                {nft.description}
+                                            </Text>
+                                        </Col>
+                                    </Card.Header>
+                                    <Card.Image
+                                      src={nft.image}
+                                      height={340}
+                                      width="100%"
+                                      alt="Card image background"
+                                    />
+                                    <Card.Footer
+                                      blur
+                                      css={{
+                                          position: "absolute",
+                                          bgBlur: "#ffffff",
+                                          borderTop: "$borderWeights$light solid rgba(255, 255, 255, 0.2)",
+                                          bottom: 0,
+                                          zIndex: 1,
+                                      }}
+                                    >
+                                        <Row>
+                                            <Col>
+                                                <Text color="#000" size={12}>
+                                                    Available soon.
+                                                </Text>
+                                                <Text color="#000" size={12}>
+                                                    Get notified.
+                                                </Text>
+                                            </Col>
+                                            <Col>
+                                                <Row justify="flex-end">
+                                                    <Button flat auto rounded color="secondary" onClick={() => buyNFTs(nft)}>
+                                                        <Text
+                                                          css={{ color: "inherit" }}
+                                                          size={12}
+                                                          weight="bold"
+                                                          transform="uppercase"
+                                                        >
+                                                            Buy NFT
+                                                        </Text>
+                                                    </Button>
+                                                </Row>
+                                            </Col>
+                                        </Row>
+                                    </Card.Footer>
+
+                                </Card>
+                            </Grid>
+
                       ))
                   }
-              </div>
-          </div>
-      </div>
+                  <Modal
+                    scroll
+                    width="600px"
+                    aria-labelledby="modal-title"
+                    aria-describedby="modal-description"
+                    {...bindings}
+                    blur
+                  >
+                      <Modal.Header>
+                          <Text id="modal-title" size={18}>
+                              Not enough ETH
+                          </Text>
+                      </Modal.Header>
+                      <Modal.Body>
+                          <Text id="modal-description">
+                              You don't have enough ETH to buy this NFT. Try again after you deposit more ETH to your wallet.
+                          </Text>
+                      </Modal.Body>
+                      <Modal.Footer>
+                          <Button auto color="error" onClick={() => setVisible(false)}>
+                              Ok
+                          </Button>
+                      </Modal.Footer>
+                  </Modal>
+      </Grid.Container>
+
     )
 }

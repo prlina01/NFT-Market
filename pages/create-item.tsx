@@ -1,7 +1,6 @@
 import {ethers} from 'ethers'
-import React, { useEffect, useState } from "react";
+import React, {useState } from "react";
 import {create as ipfsHttpClient} from 'ipfs-http-client'
-import {useWeb3React} from "@web3-react/core";
 import {useRouter} from 'next/router'
 import {nftaddress, nftmarketaddress} from '../.config'
 import NFT from '../artifacts/contracts/NFT.sol/NFT.json'
@@ -20,27 +19,10 @@ const client = ipfsHttpClient("https://ipfs.infura.io:5001/api/v0");
 
 export default function CreateItem() {
     const [fileUrl, setFileUrl] = useState('')
-    const [nftPrice, setNftPrice] = useState(0)
     const router = useRouter()
-    const {account, deactivate, activate, active, library: provider} = useWeb3React()
-    const {reset, register, handleSubmit, formState} = useForm()
-    // useEffect(() => {
-    //     reset({
-    //         name: '',
-    //         description: '',
-    //         price: '',
-    //         file: ''
-    //     })
-    // }, [reset, formState.isD])
+    const {register, handleSubmit} = useForm()
 
 
-    async function connect() {
-        try {
-            await activate(injected)
-        } catch(e) {
-            console.log(e)
-        }
-    }
 
     async function onChangeFileHandler(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files && e.target.files[0]
@@ -54,44 +36,29 @@ export default function CreateItem() {
         }
     }
 
-    // useEffect(() => {
-    //
-    //     if (active && nftPrice) void createSale()
-    // }, [active])
+
 
     async function createItem(item: any) {
-        // if(!active) await connect()
         console.log('item', item)
-        // const {name, description, price} = item
-        const name = item.name
-        const description = item.description
-        const price = item.price
+        const {name, description, price} = item
         console.log('price1', price)
-        setNftPrice(price)
 
-        // const {name, description, price} = formInput
-
-
-        // console.log(name, description, price, fileUrl)
-        console.log('price2:', nftPrice)
-        // if(!name || !description || !price || !fileUrl) return
         const data = JSON.stringify({name, description, image: fileUrl})
         try {
             const added = await client.add(data)
             const url = `https://ipfs.infura.io/ipfs/${added.path}`
-            await createSale(url)
+            await createSale(url, price)
         } catch (e) {
             console.log(e)
         }
 
     }
 
-    async function createSale(url: string) {
+    async function createSale(url: string, price: number) {
         const web3Modal = new Web3Modal()
         const connection = await web3Modal.connect()
         const provider = new ethers.providers.Web3Provider(connection)
         const signer = provider.getSigner()
-        console.log('price3:', nftPrice)
 
         let contract = new ethers.Contract(nftaddress, NFT.abi, signer)
         let transaction = await contract.createToken(url)
@@ -101,14 +68,13 @@ export default function CreateItem() {
         let value = event.args[2]
         let tokenId = value.toNumber()
 
-        const price = ethers.utils.parseUnits(nftPrice.toString(), 'ether')
-        console.log('price4', price)
+        const parsedPrice = ethers.utils.parseUnits(price.toString(), 'ether')
         contract = new ethers.Contract(nftmarketaddress, Market.abi, signer)
 
         let listingPrice = await contract.getListingPrice()
         listingPrice = listingPrice.toString()
         transaction = await contract.createMarketItem(
-            nftaddress, tokenId, price, {value: listingPrice}
+            nftaddress, tokenId, parsedPrice, {value: listingPrice}
         )
         await transaction.wait()
         await router.push('/')
