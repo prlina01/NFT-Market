@@ -5,13 +5,11 @@ import {useRouter} from 'next/router'
 import {nftaddress, nftmarketaddress} from '../.config'
 import NFT from '../artifacts/contracts/NFT.sol/NFT.json'
 import Market from '../artifacts/contracts/NFTMarket.sol/NFTMarket.json'
-import { InjectedConnector } from "@web3-react/injected-connector";
 import {useForm} from "react-hook-form";
 import Web3Modal from 'web3modal'
+import { Input, Grid, Container, Row, Col, Spacer, Card, Text, Button, Modal, useModal } from "@nextui-org/react";
 
 
-// @ts-ignore
-const injected = new InjectedConnector()
 
 // @ts-ignore
 const client = ipfsHttpClient("https://ipfs.infura.io:5001/api/v0");
@@ -21,6 +19,10 @@ export default function CreateItem() {
     const [fileUrl, setFileUrl] = useState('')
     const router = useRouter()
     const {register, handleSubmit} = useForm()
+
+    const { setVisible, bindings } = useModal();
+
+
 
 
 
@@ -39,9 +41,13 @@ export default function CreateItem() {
 
 
     async function createItem(item: any) {
-        console.log('item', item)
         const {name, description, price} = item
-        console.log('price1', price)
+
+        if (typeof window.ethereum == "undefined") {
+            setVisible(true)
+            return
+        }
+
 
         const data = JSON.stringify({name, description, image: fileUrl})
         try {
@@ -82,36 +88,106 @@ export default function CreateItem() {
 
     return (
             <div>
-                <form onSubmit={handleSubmit(createItem)} className="flex justify-center w-1/2 flex-col pb-12">
-                    <input {...register('name', {required: true})}
-                           placeholder="Asset Name"
-                           className="mt-8 border rounded p-4"
-                           // onChange={e => updateFormInput({ ...formInput, name: e.target.value })}
-                    />
-                    <textarea {...register('description', {required: true})}
-                              placeholder="Asset Description"
-                              className="mt-2 border rounded p-4"
-                              // onChange={e => updateFormInput({ ...formInput, description: e.target.value })}
-                    />
-                    <input {...register('price', {required: true})}
-                           placeholder="Asset Price in Eth"
-                           className="mt-2 border rounded p-4"
-                           // onChange={e => updateFormInput({ ...formInput, price: e.target.value })}
-                    />
+                <Spacer y={2} />
+                <Container>
+                    <Row gap={1}>
+                        <Col >
+                            <Card >
+                                <Text h1 color="white"   css={{
+                                    textGradient: "45deg, $blue500 -20%, $pink500 50%",
+                                    textAlign: "center"
+                                }}>
+                                    Sell your NFT today! Listing price is 0.025 ETH
+                                </Text>
+                            </Card>
+                        </Col>
+                    </Row>
+                </Container>
+                <Container xs>
+                <form onSubmit={handleSubmit(createItem)} className="">
+                    <Spacer y={2} />
+                    <Row  justify="center" align="center">
+                        <Col >
+                        <Input {...register('name', {required: true})}
+                          clearable
+                          underlined
+                          color="primary"
+                          labelPlaceholder="Asset Name" size={"lg"} fullWidth
+                        />
+                        </Col>
+                    </Row>
+                    <Spacer y={2} />
+
+                    <Row justify="center" align="center" >
+                        <Input {...register('description', {required: true})}
+                          clearable
+                          underlined
+                          color="primary"
+                          labelPlaceholder="Asset Description" size={"lg"} fullWidth
+                        />
+                    </Row>
+                    <Spacer y={2} />
+
+                    <Row justify="center" align="center" >
+                        <Input  {...register('price', {required: true})}
+                               clearable
+                               underlined
+                               color="primary"
+                               labelPlaceholder="Asset Price in ETH" size={"lg"} fullWidth
+                                type="number"
+                        />
+                    </Row>
+                    <Spacer y={0.5} />
+                    <Row justify="center" align="center">
+                    {
+                      fileUrl && (
+                        <img className="rounded mt-4" width="150" src={fileUrl} />
+                      )
+                    }
+                    </Row>
+                    <Spacer y={1} />
+                    <Row justify="center" align="center" >
+
                     <input {...register('file', {required: true})}
                            type="file"
                            name="Asset"
-                           className="my-4"
+                           className=""
                            onChange={onChangeFileHandler}
                     />
-                    {
-                      fileUrl && (
-                        <img className="rounded mt-4" width="350" src={fileUrl} />
-                      )
-                    }
-                    <input type="submit" value="submit" className="font-bold mt-4 bg-pink-500 hover:bg-pink-700 text-white rounded p-4 shadow-lg" />
+
+                    <Button type="submit" color="gradient">
+                        Sell
+                    </Button>
+                    </Row>
+
 
                 </form>
+                </Container>
+
+                <Modal
+                  scroll
+                  width="600px"
+                  aria-labelledby="modal-title"
+                  aria-describedby="modal-description"
+                  {...bindings}
+                  blur
+                >
+                    <Modal.Header>
+                        <Text id="modal-title" size={18}>
+                            Metamask is not installed in your browser
+                        </Text>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <Text id="modal-description">
+                              Install it to proceed.
+                        </Text>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button auto color="error" onClick={() => setVisible(false)}>
+                            Ok
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
             </div>
     )
 

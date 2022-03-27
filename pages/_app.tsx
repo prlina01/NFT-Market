@@ -4,13 +4,15 @@ import Link from 'next/link'
 import {ExternalProvider, JsonRpcFetchFunc, Web3Provider} from "@ethersproject/providers";
 import {Web3ReactProvider} from "@web3-react/core";
 
+import { NextUIProvider } from '@nextui-org/react';
+
 // const getLibrary = (provider: ExternalProvider | JsonRpcFetchFunc) => {
 //     return new Web3Provider(provider)
 // }
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <>
+    <NextUIProvider>
     <nav className="border-b p-6">
             <p className="text-4xl font-bold">Future Marketplace</p>
             <div className="flex mt-4">
@@ -37,7 +39,7 @@ function MyApp({ Component, pageProps }: AppProps) {
             </div>
     </nav>
       <Component {...pageProps} />
-    </>
+    </NextUIProvider>
       )
 }
 

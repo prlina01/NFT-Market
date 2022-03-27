@@ -27,6 +27,8 @@ export default function Home() {
     const [loadingState, setLoadingState] = useState<string>('not-loaded')
     const { setVisible, bindings } = useModal();
 
+    const [isMetamask, setIsMetamask] = useState<boolean>(false)
+
     useEffect(() => {
         void loadNFTs()
     }, [])
@@ -58,9 +60,18 @@ export default function Home() {
     }
 
     async function buyNFTs(nft: any) {
+
+        if (typeof window.ethereum == "undefined") {
+            setVisible(true)
+            setIsMetamask(false)
+            console.log(isMetamask)
+            return
+        }
+
+        setIsMetamask(true)
+
         const web3Modal = new Web3Modal()
         const connection = await web3Modal.connect()
-
         const provider = new ethers.providers.Web3Provider(connection)
 
 
@@ -69,11 +80,11 @@ export default function Home() {
         let currentBalance = await signer.getBalance()
         // currentBalance = ethers.utils.parseUnits(currentBalance.toString(), 'ether')
         const price = ethers.utils.parseUnits(nft.price.toString(), 'ether')
-        // console.log(currentBalance.toString(), price.toString())
         if(currentBalance.lt(price)) {
             setVisible(true)
             return
         }
+
         const transaction = await contract.createMarketSale(nftaddress, nft.tokenId,
             {value: price})
         await transaction.wait()
@@ -95,19 +106,21 @@ export default function Home() {
                       nfts.map((nft, i) => (
                             <Grid xs={12} sm={4} lg={3} key={i} >
                                 <Card cover>
-                                    <Card.Header css={{ position: "absolute", zIndex: 1, top: 5 }}>
+                                    <Card.Header css={{ position: "absolute", zIndex: 1,}} className={"backdrop-blur-sm"}>
                                         <Col>
                                             <Text
-                                              size={12}
+                                              size={20}
                                               weight="bold"
                                               transform="uppercase"
-                                              color="#ffffffAA"
+                                              css={{
+                                                  textGradient: "45deg, $blue500 -20%, $pink500 50%", textAlign: "center" }}
                                             >
                                                 {nft.name}
                                             </Text>
-                                            <Text h4 color="white">
-                                                {nft.description}
-                                            </Text>
+                                            {/*<Text h4 css={{*/}
+                                            {/*    textGradient: "45deg, $blue500 -20%, $pink500 50%", }}>*/}
+                                            {/*    {nft.description}*/}
+                                            {/*</Text>*/}
                                         </Col>
                                     </Card.Header>
                                     <Card.Image
@@ -117,10 +130,9 @@ export default function Home() {
                                       alt="Card image background"
                                     />
                                     <Card.Footer
-                                      blur
+                                      className={"backdrop-blur-sm"}
                                       css={{
                                           position: "absolute",
-                                          bgBlur: "#ffffff",
                                           borderTop: "$borderWeights$light solid rgba(255, 255, 255, 0.2)",
                                           bottom: 0,
                                           zIndex: 1,
@@ -128,11 +140,10 @@ export default function Home() {
                                     >
                                         <Row>
                                             <Col>
-                                                <Text color="#000" size={12}>
-                                                    Available soon.
-                                                </Text>
-                                                <Text color="#000" size={12}>
-                                                    Get notified.
+                                                <Text size={25} css={{
+                                                      textGradient: "45deg, $blue500 -20%, $pink500 50%", }}
+                                                >
+                                                    {nft.price.toString()} ETH
                                                 </Text>
                                             </Col>
                                             <Col>
@@ -167,12 +178,15 @@ export default function Home() {
                   >
                       <Modal.Header>
                           <Text id="modal-title" size={18}>
-                              Not enough ETH
+                              {isMetamask ? "Not enough ETH" : "Metamask is not installed in your browser" }
                           </Text>
                       </Modal.Header>
                       <Modal.Body>
                           <Text id="modal-description">
-                              You don't have enough ETH to buy this NFT. Try again after you deposit more ETH to your wallet.
+                              {isMetamask ?
+                              "You don't have enough ETH to buy this NFT. Try again after you deposit more ETH to your wallet.":
+                              "Install it to proceed."}
+
                           </Text>
                       </Modal.Body>
                       <Modal.Footer>
