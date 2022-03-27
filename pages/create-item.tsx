@@ -7,7 +7,7 @@ import NFT from '../artifacts/contracts/NFT.sol/NFT.json'
 import Market from '../artifacts/contracts/NFTMarket.sol/NFTMarket.json'
 import {useForm} from "react-hook-form";
 import Web3Modal from 'web3modal'
-import { Input, Grid, Container, Row, Col, Spacer, Card, Text, Button, Modal, useModal } from "@nextui-org/react";
+import { Input, Container, Row, Col, Spacer, Card, Text, Button, Modal, useModal } from "@nextui-org/react";
 
 
 
