@@ -1,14 +1,9 @@
 import '../styles/globals.css'
 import type { AppProps } from 'next/app'
 import Link from 'next/link'
-import {ExternalProvider, JsonRpcFetchFunc, Web3Provider} from "@ethersproject/providers";
-import {Web3ReactProvider} from "@web3-react/core";
 
 import { NextUIProvider } from '@nextui-org/react';
 
-// const getLibrary = (provider: ExternalProvider | JsonRpcFetchFunc) => {
-//     return new Web3Provider(provider)
-// }
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
@@ -28,7 +23,7 @@ function MyApp({ Component, pageProps }: AppProps) {
                 </Link>
                 <Link href="/my-assets">
                     <a className="mr-6 text-pink-500">
-                        Mu Digital Assets
+                        Bought digital assets
                     </a>
                 </Link>
                 <Link href="/creator-dashboard">

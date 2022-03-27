@@ -119,8 +119,7 @@ export default function CreateItem() {
                     <Spacer y={2} />
 
                     <Row justify="center" align="center" >
-                        <Input {...register('description', {required: true})}
-                          clearable
+                        <Input.Textarea {...register('description', {required: true})}
                           underlined
                           color="primary"
                           labelPlaceholder="Asset Description" size={"lg"} fullWidth
