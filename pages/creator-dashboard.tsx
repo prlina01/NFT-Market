@@ -9,15 +9,37 @@ import {
 
 import Market from '../artifacts/contracts/NFTMarket.sol/NFTMarket.json'
 import NFT from '../artifacts/contracts/NFT.sol/NFT.json'
+import { useRouter } from "next/router";
+import { Card, Col, Grid, Row, Text } from "@nextui-org/react";
 
 export default function CreatorDashboard() {
-  const [nfts, setNfts] = useState<any>([])
-  const [sold, setSold] = useState<any>([])
+
+  const [nfts, setNfts] = useState<INft[]>([])
+  const [sold, setSold] = useState<INft[]>([])
   const [loadingState, setLoadingState] = useState('not-loaded')
+  const router = useRouter()
   useEffect(() => {
     void loadNFTs()
   }, [])
+
+  interface INft {
+    price: number,
+    tokenId: ethers.BigNumber,
+    seller: string,
+    owner: string,
+    sold: boolean,
+    image: string,
+    name: string
+  }
+
+
   async function loadNFTs() {
+
+    if (typeof window.ethereum == "undefined") {
+      router.push('/')
+      return
+    }
+
     const web3Modal = new Web3Modal()
     const connection = await web3Modal.connect()
     const provider = new ethers.providers.Web3Provider(connection)
@@ -27,7 +49,7 @@ export default function CreatorDashboard() {
     const tokenContract = new ethers.Contract(nftaddress, NFT.abi, provider)
     const data = await marketContract.fetchItemsCreated()
 
-    const items = await Promise.all(data.map(async (i: any) => {
+    const items = await Promise.all(data.map(async (i: INft) => {
       const tokenUri = await tokenContract.tokenURI(i.tokenId)
       const meta = await axios.get(tokenUri)
       let price = ethers.utils.formatUnits(i.price.toString(), 'ether')
@@ -38,6 +60,7 @@ export default function CreatorDashboard() {
         owner: i.owner,
         sold: i.sold,
         image: meta.data.image,
+        name: meta.data.name
       }
       return item
     }))
@@ -52,36 +75,133 @@ export default function CreatorDashboard() {
     <div>
       <div className="p-4">
         <h2 className="text-2xl py-2">Items Created</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
           {
-            nfts.map((nft, i) => (
-              <div key={i} className="border shadow rounded-xl overflow-hidden">
-                <img src={nft.image} className="rounded" />
-                <div className="p-4 bg-black">
-                  <p className="text-2xl font-bold text-white">Price - {nft.price} Eth</p>
-                </div>
-              </div>
-            ))
+            <Grid.Container gap={2} justify="center">
+              {
+                nfts.map((nft, i) => (
+                    <Grid xs={12} sm={4} lg={3} key={i} >
+                      <Card>
+                        <Card.Header css={{ position: "absolute", zIndex: 1, bgColor: '$blue900'}}>
+                          <Col>
+                            <Text
+                              size={20}
+                              weight="bold"
+                              transform="uppercase"
+                              css={{
+                                textGradient: "45deg, $blue500 -20%, $pink500 50%", textAlign: "center" }}
+                            >
+                              {nft.name}
+                            </Text>
+                            {/*<Text h4 css={{*/}
+                            {/*    textGradient: "45deg, $blue500 -20%, $pink500 50%", }}>*/}
+                            {/*    {nft.description}*/}
+                            {/*</Text>*/}
+                          </Col>
+                        </Card.Header>
+                        <Card.Image
+                          src={nft.image}
+                          height={340}
+                          width="100%"
+                          // objectFit="cover"
+                          alt="Card image background"
+                        />
+                        <Card.Footer
+                          // className={"backdrop-blur-sm"}
+                          css={{
+                            bgColor: '$blue900',
+                            position: "absolute",
+                            borderTop: "$borderWeights$light solid rgba(255, 255, 255, 0.2)",
+                            bottom: 0,
+                            zIndex: 1,
+                          }}
+                        >
+                          <Row>
+                            <Col>
+                              <Text size={25} css={{
+                                textGradient: "45deg, $blue500 -20%, $pink500 50%", }}
+                              >
+                                {nft.price.toString()} ETH
+                              </Text>
+                            </Col>
+                            <Col>
+                            </Col>
+                          </Row>
+                        </Card.Footer>
+
+                      </Card>
+                    </Grid>
+                  )
+                )
+              }
+            </Grid.Container>
           }
-        </div>
       </div>
       <div className="px-4">
         {
           Boolean(sold.length) && (
             <div>
               <h2 className="text-2xl py-2">Items sold</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
                 {
-                  sold.map((nft, i) => (
-                    <div key={i} className="border shadow rounded-xl overflow-hidden">
-                      <img src={nft.image} className="rounded" />
-                      <div className="p-4 bg-black">
-                        <p className="text-2xl font-bold text-white">Price - {nft.price} Eth</p>
-                      </div>
-                    </div>
-                  ))
+                  <Grid.Container gap={2} justify="center">
+                    {
+                      sold.map((nft, i) => (
+                          <Grid xs={12} sm={4} lg={3} key={i} >
+                            <Card>
+                              <Card.Header css={{ position: "absolute", zIndex: 1, bgColor: '$blue900'}}>
+                                <Col>
+                                  <Text
+                                    size={20}
+                                    weight="bold"
+                                    transform="uppercase"
+                                    css={{
+                                      textGradient: "45deg, $blue500 -20%, $pink500 50%", textAlign: "center" }}
+                                  >
+                                    {nft.name}
+                                  </Text>
+                                  {/*<Text h4 css={{*/}
+                                  {/*    textGradient: "45deg, $blue500 -20%, $pink500 50%", }}>*/}
+                                  {/*    {nft.description}*/}
+                                  {/*</Text>*/}
+                                </Col>
+                              </Card.Header>
+                              <Card.Image
+                                src={nft.image}
+                                height={340}
+                                width="100%"
+                                // objectFit="cover"
+                                alt="Card image background"
+                              />
+                              <Card.Footer
+                                // className={"backdrop-blur-sm"}
+                                css={{
+                                  bgColor: '$blue900',
+                                  position: "absolute",
+                                  borderTop: "$borderWeights$light solid rgba(255, 255, 255, 0.2)",
+                                  bottom: 0,
+                                  zIndex: 1,
+                                }}
+                              >
+                                <Row>
+                                  <Col>
+                                    <Text size={25} css={{
+                                      textGradient: "45deg, $blue500 -20%, $pink500 50%", }}
+                                    >
+                                      {nft.price.toString()} ETH
+                                    </Text>
+                                  </Col>
+                                  <Col>
+                                  </Col>
+                                </Row>
+                              </Card.Footer>
+
+                            </Card>
+                          </Grid>
+                        )
+                      )
+                    }
+                  </Grid.Container>
+
                 }
-              </div>
             </div>
           )
         }
