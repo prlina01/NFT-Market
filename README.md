@@ -4,8 +4,8 @@ NFTs, as blockchain-based immutable ownership records of digital assets, are qui
 
 NFT marketplace, as the name implies, is a decentralized platform where users can create, buy, sell, and store non-fungible tokens. An NFT marketplace facilities NFT minting and trading at a global scale, while blockchain as its underlying technology ensures transparency and immutable recording of the digital asset tokenization and trading process. The marketplace also takes care of NFT storage.
 
-## You can access the application here: https://nft-marketplace-lime.vercel.app/
-*To interact with the app you will need a wallet connected to the **rinkeby** testnet network.
+### You can access the application here: https://nft-marketplace-lime.vercel.app/
+*To interact with the app you will need a wallet connected to the **rinkeby** testnet.
 
 ![za-dok2](https://user-images.githubusercontent.com/36077702/163671070-97b7d5c8-1827-493a-8884-b830dfe86a12.png)
 
