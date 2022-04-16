@@ -115,10 +115,10 @@ export default function CreateItem() {
 
         const value = e.target.value
         const isValid = value.match(/^[+]?([0-9]+\.?[0-9]*|\.[0-9]+)$/)
-        console.log(!isValid)
+        // console.log(!isValid)
         if(!isValid || value.length > 15)  {
             setValue('price', value.substring(0,value.length - 1))
-            console.log(value.substring(0,value.length - 1))
+            // console.log(value.substring(0,value.length - 1))
         }
         else {
             setValue('price', value)

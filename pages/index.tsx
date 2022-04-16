@@ -57,7 +57,7 @@ export default function Home() {
             return item
         }))
         setNfts(items)
-        console.log(items[0])
+        // console.log(items[0])
 
         setLoadingState('loaded')
     }
@@ -68,7 +68,7 @@ export default function Home() {
         if (typeof window.ethereum == "undefined") {
             setVisible(true)
             setIsMetamask(false)
-            console.log(isMetamask)
+            // console.log(isMetamask)
             return
         }
 
